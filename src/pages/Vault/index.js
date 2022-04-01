@@ -12,12 +12,12 @@ import { useEffect, useState } from 'react';
 import {
   useWFTMContract,
   useFMintContract,
-  useFUSDContract,
+  useFUSDContract
 } from '../../contracts';
 import {
   FMINT_CONTRACT_ADDRESS,
   FUSD_CONTRACT_ADDRESS,
-  WFTM_CONTRACT_ADDRESS,
+  WFTM_CONTRACT_ADDRESS
 } from '../../constants/walletconnection';
 import BigNumber from 'bignumber.js';
 import useVaultInfo from '../../hooks/useVaultInfo';
@@ -411,8 +411,12 @@ function Vault() {
   const [fUSDWalletBalance, setFUSDWalletBalance] = useState(0);
   const cryptoCurrencies = ['wFTM', 'USD'];
   const { price } = useSelector((state) => state.Price);
-  const { getWFTMBalance, increaseAllowance, wftmDecimals, wftmSymbol } =
-    useWFTMContract();
+  const {
+    getWFTMBalance,
+    increaseAllowance,
+    wftmDecimals,
+    wftmSymbol
+  } = useWFTMContract();
   const {
     mustDeposit,
     mustWithdraw,
@@ -426,7 +430,7 @@ function Vault() {
     getMaxToMint,
     getMaxToMintWithChanges,
     getDebtBalance,
-    getCollateralBalance,
+    getCollateralBalance
   } = useFMintContract();
   const { increaseFUSDAllowance, getFUSDBalance } = useFUSDContract();
   const minCollateralRatio = defaultVaultInfo.minCollateralRatio;
@@ -845,9 +849,9 @@ function Vault() {
             address: tokenAddress, // The address that the token is at.
             symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
             decimals: tokenDecimals, // The number of decimals in the token
-            image: tokenImage, // A string url of the token logo
-          },
-        },
+            image: tokenImage // A string url of the token logo
+          }
+        }
       });
 
       if (wasAdded) {
@@ -873,6 +877,19 @@ function Vault() {
     setGenerating(false);
   };
 
+  const dustDebtWarning = () => {
+    if (
+      generateFUSD &&
+      parseFloat(generateFUSD) > 0 &&
+      parseFloat(generateFUSD) < 1
+    )
+      return (
+        <span style={{ color: 'red', fontFamily: 'Proxima Nova' }}>
+          Please mint 1 or more fUSDS
+        </span>
+      );
+    return null;
+  };
   const generateFUSDButtonDisable = () => {
     if (depositWFTM) {
       return (
@@ -882,7 +899,8 @@ function Vault() {
         parseFloat(generateFUSD) > parseFloat(currentMaxToMint) ||
         (collateral[turnCollateral].toString() * 1 >
           balance[turnCollateral].toString() * 1 &&
-          collateral[turnCollateral] * 1 === 0)
+          collateral[turnCollateral] * 1 === 0) ||
+        (generateFUSD && parseFloat(generateFUSD) < 1)
       );
     }
 
@@ -1033,6 +1051,7 @@ function Vault() {
                         onChange={(e) => handleGenerateFUSDChange(e)}
                       ></GenerateFUSDInput>
                     </GenerateFUSDInputWrapper>
+                    {dustDebtWarning()}
                   </GenerateFUSDContainer>
                 )}
                 <GenerateFUSDButton
